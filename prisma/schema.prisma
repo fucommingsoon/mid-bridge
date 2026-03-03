@@ -1,0 +1,125 @@
+// Prisma Schema for Medi-Bridge
+// Migrated from Python SQLAlchemy models
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Disease model - ~25K records from SympGAN dataset
+model Disease {
+  id           Int                       @id @default(autoincrement())
+  cui          String                    @unique // CUI unique identifier
+  name         String                    @db.VarChar(500)
+  alias        String?                   // Pipe-separated
+  definition   String?                   @db.Text
+  externalIds  String?                   @map("external_ids") // Pipe-separated
+  createdAt    DateTime                  @default(now()) @map("created_at")
+  updatedAt    DateTime?                 @updatedAt @map("updated_at")
+
+  // Relations
+  symptoms     DiseaseSymptomAssociation[]
+
+  @@index([name])
+  @@index([cui])
+  @@map("diseases")
+}
+
+// Symptom model - ~12K records from SympGAN dataset
+model Symptom {
+  id           Int                       @id @default(autoincrement())
+  cui          String                    @unique // CUI unique identifier
+  name         String                    @db.VarChar(500)
+  alias        String?                   // Pipe-separated
+  definition   String?                   @db.Text
+  externalIds  String?                   @map("external_ids") // Pipe-separated
+  createdAt    DateTime                  @default(now()) @map("created_at")
+  updatedAt    DateTime?                 @updatedAt @map("updated_at")
+
+  // Relations
+  diseases     DiseaseSymptomAssociation[]
+  extensions   SymptomExtension[]
+
+  @@index([name])
+  @@index([cui])
+  @@map("symptoms")
+}
+
+// Disease-Symptom Association - ~184K relationships
+model DiseaseSymptomAssociation {
+  id         Int      @id @default(autoincrement())
+  diseaseId  Int      @map("disease_id")
+  symptomId  Int      @map("symptom_id")
+  source     String?  @db.VarChar(200)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  disease    Disease  @relation(fields: [diseaseId], references: [id], onDelete: Cascade)
+  symptom    Symptom  @relation(fields: [symptomId], references: [id], onDelete: Cascade)
+
+  @@unique([diseaseId, symptomId])
+  @@index([diseaseId])
+  @@index([symptomId])
+  @@map("disease_symptom_associations")
+}
+
+// Symptom Extension - Extended information for symptoms
+model SymptomExtension {
+  id              Int      @id @default(autoincrement())
+  symptomId       Int      @map("symptom_id")
+  fullDescription String?  @map("full_description") @db.Text
+  summary         String?  @db.Text
+  keywords        String?  // Semicolon-separated
+  clinicalNotes   String?  @map("clinical_notes") @db.Text
+  source          String?  @db.VarChar(100) // AI, manual, etc.
+  version         String?  @db.VarChar(50)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime? @updatedAt @map("updated_at")
+
+  // Relations
+  symptom         Symptom  @relation(fields: [symptomId], references: [id], onDelete: Cascade)
+
+  @@index([symptomId])
+  @@map("symptom_extensions")
+}
+
+// Conversation - Doctor-patient session tracking
+model Conversation {
+  id        Int       @id @default(autoincrement())
+  title     String    @db.VarChar(255)
+  startedAt DateTime  @default(now()) @map("started_at")
+  department String?  @db.VarChar(100)
+  patientId Int?      @map("patient_id")
+  userId    Int?      @map("user_id")
+  progress  String?   @db.Text // JSON array
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  // Relations
+  messages  Message[]
+
+  @@index([userId])
+  @@index([startedAt])
+  @@map("conversations")
+}
+
+// Message - Individual messages within conversations
+model Message {
+  id             Int         @id @default(autoincrement())
+  conversationId Int         @map("conversation_id")
+  content        String      @db.Text
+  role           String?     @db.VarChar(50)
+  sentAt         DateTime    @default(now()) @map("sent_at")
+  createdAt      DateTime    @default(now()) @map("created_at")
+
+  // Relations
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([sentAt])
+  @@map("messages")
+}

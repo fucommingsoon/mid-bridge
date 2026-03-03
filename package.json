@@ -6,9 +6,20 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "import:sympgan": "ts-node scripts/import-sympgan.ts",
+    "export:extensions": "ts-node scripts/export-symptom-extensions.ts",
+    "generate:extensions": "ts-node scripts/generate-symptom-extensions.ts",
+    "index:qdrant": "ts-node scripts/index-symptoms-to-qdrant.ts"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.9",
+    "@prisma/client": "^6.19.2",
+    "@qdrant/js-client-rest": "^1.17.0",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"
@@ -20,7 +31,9 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "prisma": "^6.19.2",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
