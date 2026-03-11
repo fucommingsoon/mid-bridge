@@ -65,7 +65,7 @@ async function checkPointExistsByCUI(client: QdrantClient, cui: string): Promise
       },
       limit: 1,
     });
-    return results[0].length > 0;
+    return results.points.length > 0;
   } catch {
     // Collection doesn't exist or other error
     return false;

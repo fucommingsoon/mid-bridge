@@ -181,6 +181,15 @@ export function useAudioRecorder({
 
   const startRecording = useCallback(async () => {
     try {
+      // 检查浏览器环境和 API 可用性
+      if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+        throw new Error('Browser environment not available');
+      }
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('getUserMedia API not supported in this browser');
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           sampleRate: SAMPLE_RATE,

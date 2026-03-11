@@ -131,6 +131,18 @@ export default function Home() {
 
   const handleStartConsultation = async () => {
     try {
+      // 检查浏览器环境
+      if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+        alert('请在浏览器中访问此页面');
+        return;
+      }
+
+      // 检查 getUserMedia API 支持
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('您的浏览器不支持音频录制，请使用现代浏览器（Chrome、Firefox、Safari 等）');
+        return;
+      }
+
       const session = await createConsultationSession('语音问诊', 'General');
       const cid = session.conversation_id;
 
@@ -140,10 +152,13 @@ export default function Home() {
       const started = await startRecording();
       if (started) {
         setPageState('consulting');
+      } else {
+        alert('启动录音失败，请检查麦克风权限');
       }
     } catch (error) {
       console.error('Failed to start consultation:', error);
-      alert('启动问诊失败，请检查麦克风权限和网络连接');
+      const errorMessage = error instanceof Error ? error.message : '未知错误';
+      alert(`启动问诊失败：${errorMessage}\n\n请确保：\n1. 允许麦克风权限\n2. 使用 HTTPS 或 localhost 访问\n3. 浏览器支持音频录制`);
     }
   };
 
