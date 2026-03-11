@@ -14,7 +14,9 @@
     "import:sympgan": "ts-node scripts/import-sympgan.ts",
     "export:extensions": "ts-node scripts/export-symptom-extensions.ts",
     "generate:extensions": "ts-node scripts/generate-symptom-extensions.ts",
-    "index:qdrant": "ts-node scripts/index-symptoms-to-qdrant.ts"
+    "index:qdrant": "ts-node scripts/index-symptoms-to-qdrant.ts",
+    "export:vectors": "ts-node scripts/export-qdrant-vectors.ts",
+    "import:vectors": "ts-node scripts/import-qdrant-vectors.ts"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",

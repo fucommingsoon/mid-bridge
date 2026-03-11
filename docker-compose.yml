@@ -2,13 +2,26 @@
 # Development and production configuration
 
 services:
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/cert:/etc/nginx/cert:ro
+    depends_on:
+      - app
+    restart: unless-stopped
+    networks:
+      - medi-bridge-network
+
   # Next.js Application
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "80:80"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/medibridge
       - QDRANT_URL=http://qdrant:6333
