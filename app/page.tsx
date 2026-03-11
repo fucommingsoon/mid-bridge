@@ -86,14 +86,18 @@ export default function Home() {
         }
 
         if (result.results && result.results.length > 0) {
-          setSymptoms(
-            result.results.map((r: SymptomMatch) => ({
+          setSymptoms((prev) => {
+            const newSymptoms = result.results.map((r: SymptomMatch) => ({
               cui: r.cui || '',
               summary: r.summary || '',
               confidence: r.confidence_score,
               description: r.full_description || '',
-            }))
-          );
+            }));
+            // 合并新旧症状，去重（基于 cui）
+            const existingCuis = new Set(prev.map((s) => s.cui));
+            const uniqueNew = newSymptoms.filter((s) => !existingCuis.has(s.cui));
+            return [...prev, ...uniqueNew];
+          });
         }
       } catch (error) {
         console.error('API request failed:', error);
